@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* ===========================
+   Google Font Import
+=========================== */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap');
+
+
+h1, h2, h3, h4, h5, h6,
+p, span, a, li, button, input, textarea, select,
+label, div {
+  font-family: var(--primary-font-family);
+}
+
+
+body {
+  --primary-font-family: 'Baloo 2', cursive;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #f9fafb;
+  color: #1f2937; /* Tailwind's gray-800 */
+}
+
+
+
+
+
+
+
