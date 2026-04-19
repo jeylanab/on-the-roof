@@ -25,9 +25,6 @@ export default function Header() {
         <div>
           <div className="font-['Rajdhani'] text-base sm:text-lg md:text-xl font-bold text-green-400 tracking-widest uppercase leading-tight">
             OTRC
-            <span className="block sm:inline text-gray-300 font-normal sm:ml-2">
-              / On The Roof Contracting
-            </span>
           </div>
 
           <div className="text-[10px] sm:text-[11px] text-gray-500 tracking-widest uppercase mt-0.5">

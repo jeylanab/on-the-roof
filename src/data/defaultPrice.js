@@ -11,6 +11,7 @@ export const DEFAULT_PRICING = {
       { id: 'cap_base',   label: 'Cap & Base Sheet System',           rate: 95,   unit: 'SQ' },
       { id: 'ridge_vent', label: 'Ridge Vent',                        rate: 8,    unit: 'LF' },
       { id: 'osb_deck',   label: 'OSB / Decking Replacement',         rate: 3.5,  unit: 'sqft' },
+      { id: 'osb_layover',label: 'OSB Layover',                       rate: 2.5,  unit: 'sqft' },
       { id: 'plank_rep',  label: 'Plank Deck Repair',                 rate: 4.5,  unit: 'sqft' },
       { id: 'wall_flash', label: 'Wall Flashing (beyond 40 LF)',      rate: 12,   unit: 'LF' },
       { id: 'step_flash', label: 'Step Flashing Add/Replace',         rate: 8,    unit: 'LF' },

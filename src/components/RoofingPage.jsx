@@ -91,19 +91,23 @@ function RoofingSystem() {
         </Field>
       </div>
 
-      <SectionSub>Auto Add-Ons (uses roof squares as quantity)</SectionSub>
+      <SectionSub>Auto Add-Ons (uses roof squares as quantity — or type to override)</SectionSub>
       <div
         className="grid gap-1.5 px-2 mb-1"
         style={{ gridTemplateColumns: '2fr 80px 90px 90px 30px' }}
       >
-        {['Item', 'Rate/SQ', 'Qty', 'Total', 'Use'].map((h, i) => (
+        {['Item', 'Rate/SQ', 'Qty (sqft)', 'Total', 'Use'].map((h, i) => (
           <span key={i} className={`text-[10px] text-gray-600 uppercase tracking-wider ${i === 0 ? 'text-left' : 'text-center'}`}>{h}</span>
         ))}
       </div>
       {AUTO_ADDONS.map(({ key, label }) => {
         const a = r.autoAddons[key];
         const sq = parseFloat(r.squares) || 0;
-        const tot = a.enabled ? sq * (parseFloat(a.rate) || 0) : 0;
+        // Use typed qty override if provided, otherwise fall back to roof squares
+        const effectiveQty = a.qtyOverride !== '' && a.qtyOverride !== undefined
+          ? parseFloat(a.qtyOverride) || 0
+          : sq;
+        const tot = a.enabled ? effectiveQty * (parseFloat(a.rate) || 0) : 0;
         return (
           <div
             key={key}
@@ -117,7 +121,13 @@ function RoofingSystem() {
               onChange={(e) => updateRoofingAutoAddon(key, 'rate', e.target.value)}
               className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1 text-[12px] outline-none text-right focus:border-green-400 w-full"
             />
-            <span className="text-[12px] text-gray-500 text-center">auto</span>
+            <input
+              type="number"
+              value={a.qtyOverride ?? ''}
+              placeholder={sq > 0 ? String(sq) : 'auto'}
+              onChange={(e) => updateRoofingAutoAddon(key, 'qtyOverride', e.target.value)}
+              className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-400 px-2 py-1 text-[12px] outline-none text-right focus:border-green-400 w-full placeholder:text-gray-600"
+            />
             <span className="text-[12px] text-green-400 font-semibold text-right">{fmt(tot)}</span>
             <div className="flex items-center justify-center">
               <input
@@ -143,7 +153,7 @@ function RoofingLineItems() {
   return (
     <Card>
       <CardTitle>Line Item Add-Ons</CardTitle>
-      <AddonColHeaders />
+      <AddonColHeaders showColor />
       {items.map((item, i) => (
         <AddonRow
           key={item.id}
@@ -151,9 +161,12 @@ function RoofingLineItems() {
           unit={item.unit}
           rate={item.rate}
           qty={item.qty}
+          color={item.color}
           total={lineTotal(item.rate, item.qty)}
+          showColor
           onRateChange={(v) => updateRoofingLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateRoofingLineItem(i, 'qty', v)}
+          onColorChange={(v) => updateRoofingLineItem(i, 'color', v)}
         />
       ))}
     </Card>

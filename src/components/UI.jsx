@@ -1,3 +1,4 @@
+
 import { fmt } from '../data/utils';
 
 // ─── FIELD INPUT ─────────────────────────────────────────────────────────────
@@ -74,9 +75,14 @@ export function SectionSub({ children }) {
 
 // ─── LINE ITEM COLUMN HEADERS ─────────────────────────────────────────────────
 
-export function AddonColHeaders({ cols = ['Item', 'Rate', 'Qty', 'Total'] }) {
+// showColor adds a Color column between Qty and Total
+export function AddonColHeaders({ showColor = false }) {
+  const cols = showColor
+    ? ['Item', 'Rate', 'Qty', 'Color', 'Total']
+    : ['Item', 'Rate', 'Qty', 'Total'];
+  const template = showColor ? '3fr 80px 70px 100px 80px' : '3fr 90px 80px 90px';
   return (
-    <div className="grid gap-1.5 px-2 mb-1" style={{ gridTemplateColumns: `${cols.length === 4 ? '3fr 90px 80px 90px' : '2fr 80px 90px 90px 30px'}` }}>
+    <div className="grid gap-1.5 px-2 mb-1" style={{ gridTemplateColumns: template }}>
       {cols.map((c, i) => (
         <span key={i} className={`text-[10px] text-gray-600 uppercase tracking-wider ${i === 0 ? 'text-left' : 'text-right'}`}>
           {c}
@@ -88,18 +94,17 @@ export function AddonColHeaders({ cols = ['Item', 'Rate', 'Qty', 'Total'] }) {
 
 // ─── ADDON ROW ────────────────────────────────────────────────────────────────
 
-export function AddonRow({ label, unit, rate, qty, total, onRateChange, onQtyChange }) {
+// showColor=true adds a text color input between qty and total (for production notes)
+export function AddonRow({ label, unit, rate, qty, color, total, onRateChange, onQtyChange, onColorChange, showColor = false }) {
+  const template = showColor ? '3fr 80px 70px 100px 80px' : '3fr 90px 80px 90px';
   return (
-    <div className="grid gap-1.5 items-center px-2 py-1.5 bg-[#161616] border border-green-900/10 rounded-md mb-1" style={{ gridTemplateColumns: '3fr 90px 80px 90px' }}>
+    <div className="grid gap-1.5 items-center px-2 py-1.5 bg-[#161616] border border-green-900/10 rounded-md mb-1" style={{ gridTemplateColumns: template }}>
       <span className="text-[12px] text-gray-300">
         {label} <span className="text-gray-600 text-[10px]">({unit})</span>
       </span>
-      <input
-        type="number"
-        value={rate}
-        onChange={(e) => onRateChange(e.target.value)}
-        className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1 text-[12px] outline-none text-right focus:border-green-400 w-full"
-      />
+  <span className="text-[12px] text-gray-500 text-right pr-1">
+  ${Number(rate).toFixed(2)}
+</span>
       <input
         type="number"
         value={qty}
@@ -107,6 +112,15 @@ export function AddonRow({ label, unit, rate, qty, total, onRateChange, onQtyCha
         onChange={(e) => onQtyChange(e.target.value)}
         className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1 text-[12px] outline-none text-right focus:border-green-400 w-full"
       />
+      {showColor && (
+        <input
+          type="text"
+          value={color || ''}
+          placeholder="Color..."
+          onChange={(e) => onColorChange && onColorChange(e.target.value)}
+          className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-300 px-2 py-1 text-[11px] outline-none focus:border-green-400 w-full placeholder:text-gray-700"
+        />
+      )}
       <span className="text-[12px] text-green-400 font-semibold text-right">{fmt(total)}</span>
     </div>
   );

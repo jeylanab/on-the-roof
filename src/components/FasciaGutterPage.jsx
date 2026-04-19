@@ -14,7 +14,7 @@ function FasciaSystem() {
   return (
     <Card>
       <CardTitle>Fascia Metal System</CardTitle>
-      <AddonColHeaders />
+      <AddonColHeaders showColor />
       {items.map((item, i) => (
         <AddonRow
           key={item.id}
@@ -22,9 +22,12 @@ function FasciaSystem() {
           unit={item.unit}
           rate={item.rate}
           qty={item.qty}
+          color={item.color}
           total={lineTotal(item.rate, item.qty)}
+          showColor
           onRateChange={(v) => updateFasciaLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateFasciaLineItem(i, 'qty', v)}
+          onColorChange={(v) => updateFasciaLineItem(i, 'color', v)}
         />
       ))}
     </Card>
@@ -55,7 +58,7 @@ function GutterSystem() {
         </Field>
         <div />
       </div>
-      <AddonColHeaders />
+      <AddonColHeaders showColor />
       {g.lineItems.map((item, i) => (
         <AddonRow
           key={item.id}
@@ -63,9 +66,12 @@ function GutterSystem() {
           unit={item.unit}
           rate={item.rate}
           qty={item.qty}
+          color={item.color}
           total={lineTotal(item.rate, item.qty)}
+          showColor
           onRateChange={(v) => updateGutterLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateGutterLineItem(i, 'qty', v)}
+          onColorChange={(v) => updateGutterLineItem(i, 'color', v)}
         />
       ))}
     </Card>

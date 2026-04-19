@@ -24,14 +24,15 @@ const initialState = {
     squares: '',
     baseRatePerSQ: DEFAULT_PRICING.roofing.baseRatePerSQ,
     autoAddons: {
-      twoStory: { enabled: false, rate: DEFAULT_PRICING.roofing.twoStoryRate },
-      pitch712: { enabled: false, rate: DEFAULT_PRICING.roofing.pitch712Rate },
-      pitch1012: { enabled: false, rate: DEFAULT_PRICING.roofing.pitch1012Rate },
-      extraLayer: { enabled: false, rate: DEFAULT_PRICING.roofing.extraLayerRate },
+      twoStory:   { enabled: false, rate: DEFAULT_PRICING.roofing.twoStoryRate,   qtyOverride: '' },
+      pitch712:   { enabled: false, rate: DEFAULT_PRICING.roofing.pitch712Rate,   qtyOverride: '' },
+      pitch1012:  { enabled: false, rate: DEFAULT_PRICING.roofing.pitch1012Rate,  qtyOverride: '' },
+      extraLayer: { enabled: false, rate: DEFAULT_PRICING.roofing.extraLayerRate, qtyOverride: '' },
     },
     lineItems: DEFAULT_PRICING.roofing.lineItems.map((item) => ({
       ...item,
       qty: '',
+      color: '',
     })),
   },
 
@@ -48,6 +49,7 @@ const initialState = {
     lineItems: DEFAULT_PRICING.siding.lineItems.map((item) => ({
       ...item,
       qty: '',
+      color: '',
     })),
   },
 
@@ -56,6 +58,7 @@ const initialState = {
     lineItems: DEFAULT_PRICING.soffit.lineItems.map((item) => ({
       ...item,
       qty: '',
+      color: '',
     })),
   },
 
@@ -64,6 +67,7 @@ const initialState = {
     lineItems: DEFAULT_PRICING.fascia.lineItems.map((item) => ({
       ...item,
       qty: '',
+      color: '',
     })),
   },
 
@@ -74,6 +78,7 @@ const initialState = {
     lineItems: DEFAULT_PRICING.gutter.lineItems.map((item) => ({
       ...item,
       qty: '',
+      color: '',
     })),
   },
 
@@ -242,7 +247,11 @@ export function selectRoofingTotal(state) {
   const sq = parseFloat(state.roofing.squares) || 0;
   const base = sq * (parseFloat(state.roofing.baseRatePerSQ) || 0);
   const auto = Object.values(state.roofing.autoAddons).reduce((sum, a) => {
-    return sum + (a.enabled ? sq * (parseFloat(a.rate) || 0) : 0);
+    if (!a.enabled) return sum;
+    const effectiveQty = a.qtyOverride !== '' && a.qtyOverride !== undefined
+      ? parseFloat(a.qtyOverride) || 0
+      : sq;
+    return sum + effectiveQty * (parseFloat(a.rate) || 0);
   }, 0);
   const lines = state.roofing.lineItems.reduce((sum, item) => {
     return sum + (parseFloat(item.qty) || 0) * (parseFloat(item.rate) || 0);

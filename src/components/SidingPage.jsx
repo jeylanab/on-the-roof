@@ -84,7 +84,7 @@ function SidingSystem() {
       </div>
 
       <SectionSub>Siding Materials</SectionSub>
-      <AddonColHeaders />
+      <AddonColHeaders showColor />
       {s.lineItems.map((item, i) => (
         <AddonRow
           key={item.id}
@@ -92,9 +92,12 @@ function SidingSystem() {
           unit={item.unit}
           rate={item.rate}
           qty={item.qty}
+          color={item.color}
           total={lineTotal(item.rate, item.qty)}
+          showColor
           onRateChange={(v) => updateSidingLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateSidingLineItem(i, 'qty', v)}
+          onColorChange={(v) => updateSidingLineItem(i, 'color', v)}
         />
       ))}
     </Card>
@@ -110,7 +113,7 @@ function SoffitSystem() {
   return (
     <Card>
       <CardTitle>Soffit System</CardTitle>
-      <AddonColHeaders />
+      <AddonColHeaders showColor />
       {items.map((item, i) => (
         <AddonRow
           key={item.id}
@@ -118,9 +121,12 @@ function SoffitSystem() {
           unit={item.unit}
           rate={item.rate}
           qty={item.qty}
+          color={item.color}
           total={lineTotal(item.rate, item.qty)}
+          showColor
           onRateChange={(v) => updateSoffitLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateSoffitLineItem(i, 'qty', v)}
+          onColorChange={(v) => updateSoffitLineItem(i, 'color', v)}
         />
       ))}
     </Card>
