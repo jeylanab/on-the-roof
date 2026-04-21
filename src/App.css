@@ -33,3 +33,56 @@ input[type='number'] {
   body { background: white; color: black; }
   .no-print { display: none !important; }
 }
+
+
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0a0a;
+  color: #e8e8e8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Remove number input spinners globally — use clean text-style inputs */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* ── PRINT STYLES ───────────────────────────────────────────────────────────── */
+/* On screen: show app, hide PDF document                                        */
+.print-only { display: none; }
+.no-print   { display: block; }
+
+@media print {
+  /* Reset page */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { margin: 0; size: A4 portrait; }
+
+  /* Hide entire app shell */
+  body { background: #fff !important; margin: 0; padding: 0; }
+
+  /* Hide everything by default */
+  body > * { display: none !important; }
+
+  /* Show only root, then drill down to reveal the PDF document */
+  body > #root,
+  body > #root > *,
+  body > #root > * > * { display: block !important; background: #fff !important; }
+
+  /* Hide the dark app UI, tab nav, header when printing */
+  .no-print { display: none !important; }
+
+  /* Show the PDF document */
+  .print-only { display: block !important; }
+
+
+}
