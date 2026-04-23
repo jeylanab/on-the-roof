@@ -8,7 +8,7 @@ import { BtnPrimary, BtnOutline } from './UI';
 const EMAILJS_SERVICE_ID  = 'service_a3l9m7j';
 const EMAILJS_TEMPLATE_ID = 'template_057p884';
 const EMAILJS_PUBLIC_KEY  = 'e5-6HebUrA6Nc4xRQ';
-const PRODUCTION_EMAIL    = 'jeylantesi@gmail.com';
+const PRODUCTION_EMAIL    = 'Info@ontheroofky.net';
 
 // ─── APP UI COMPONENTS (dark theme, screen only) ─────────────────────────────
 

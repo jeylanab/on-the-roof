@@ -8,7 +8,7 @@ import { useState } from 'react';
 // 1. Go to dashboard.stripe.com → Payment Links → Create Link
 // 2. Set price to $1 (you'll override the amount via URL param)
 // 3. Paste your payment link base URL below
-const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/YOUR_LINK_HERE';
+const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/14A00jeIm8r76Puf9zebu00';
 
 const PAY_METHODS = [
   {
