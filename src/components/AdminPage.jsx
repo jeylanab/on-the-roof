@@ -24,6 +24,7 @@ function PricingEditor() {
           extraLayer: state.roofing.autoAddons.extraLayer.rate,
         },
         lineItems: state.roofing.lineItems.map((i) => ({ id: i.id, label: i.label, rate: i.rate })),
+        accessories: state.roofing.accessories.map((a) => ({ id: a.id, label: a.label })),
       },
       siding: {
         tiers: state.siding.tiers.map((t) => ({ id: t.id, price: t.price })),
@@ -165,6 +166,28 @@ function PricingEditor() {
               />
             </div>
           ))}
+        </div>
+      ))}
+
+      <SectionSub>Roofing Accessories — Labels (included in SQ price)</SectionSub>
+      <p className="text-[10px] text-gray-600 mb-2">These are production tracking items. Edit labels to match what your team uses.</p>
+      {localPricing.roofing.accessories.map((acc, i) => (
+        <div key={acc.id} className="flex items-center gap-3 mb-1">
+          <span className="text-[10px] text-gray-600 w-6">{i + 1}.</span>
+          <input
+            type="text"
+            value={acc.label}
+            onChange={(e) => setLocalPricing((p) => ({
+              ...p,
+              roofing: {
+                ...p.roofing,
+                accessories: p.roofing.accessories.map((a, idx) =>
+                  idx === i ? { ...a, label: e.target.value } : a
+                ),
+              },
+            }))}
+            className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1 text-[12px] flex-1 outline-none focus:border-green-400"
+          />
         </div>
       ))}
     </Card>

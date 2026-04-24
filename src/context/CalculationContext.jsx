@@ -34,6 +34,13 @@ const initialState = {
       qty: '',
       color: '',
     })),
+    accessories: DEFAULT_PRICING.roofing.accessories.map((acc) => ({
+      ...acc,
+      qty:   '',
+      color: '',
+      size:  '',
+      type:  '',
+    })),
   },
 
   // Siding
@@ -118,6 +125,15 @@ function reducer(state, action) {
           : item
       );
       return { ...state, roofing: { ...state.roofing, lineItems: items } };
+    }
+
+    case 'UPDATE_ROOFING_ACCESSORY': {
+      const items = state.roofing.accessories.map((acc, i) =>
+        i === action.payload.index
+          ? { ...acc, [action.payload.field]: action.payload.value }
+          : acc
+      );
+      return { ...state, roofing: { ...state.roofing, accessories: items } };
     }
 
     case 'UPDATE_SIDING':
@@ -310,6 +326,8 @@ export function CalculationProvider({ children }) {
     dispatch({ type: 'UPDATE_ROOFING_AUTO_ADDON', payload: { key, field, value } }), []);
   const updateRoofingLineItem = useCallback((index, field, value) =>
     dispatch({ type: 'UPDATE_ROOFING_LINE_ITEM', payload: { index, field, value } }), []);
+  const updateRoofingAccessory = useCallback((index, field, value) =>
+    dispatch({ type: 'UPDATE_ROOFING_ACCESSORY', payload: { index, field, value } }), []);
   const updateSiding = useCallback((payload) => dispatch({ type: 'UPDATE_SIDING', payload }), []);
   const updateSidingTier = useCallback((id, price) =>
     dispatch({ type: 'UPDATE_SIDING_TIER', payload: { id, price } }), []);
@@ -335,6 +353,7 @@ export function CalculationProvider({ children }) {
         updateRoofing,
         updateRoofingAutoAddon,
         updateRoofingLineItem,
+        updateRoofingAccessory,
         updateSiding,
         updateSidingTier,
         updateSidingLineItem,

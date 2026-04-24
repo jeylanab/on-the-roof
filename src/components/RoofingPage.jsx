@@ -115,12 +115,7 @@ function RoofingSystem() {
             style={{ gridTemplateColumns: '2fr 80px 90px 90px 30px' }}
           >
             <span className="text-[12px] text-gray-300">{label}</span>
-            <input
-              type="number"
-              value={a.rate}
-              onChange={(e) => updateRoofingAutoAddon(key, 'rate', e.target.value)}
-              className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1 text-[12px] outline-none text-right focus:border-green-400 w-full"
-            />
+            <span className="text-[12px] text-gray-500 text-right pr-1">${Number(a.rate).toFixed(2)}</span>
             <input
               type="number"
               value={a.qtyOverride ?? ''}
@@ -140,6 +135,79 @@ function RoofingSystem() {
           </div>
         );
       })}
+    </Card>
+  );
+}
+
+// ─── ROOFING ACCESSORIES ──────────────────────────────────────────────────────
+
+function RoofingAccessories() {
+  const { state, updateRoofingAccessory } = useCalculation();
+  const items = state.roofing.accessories;
+  const set = (i, field) => (e) => updateRoofingAccessory(i, field, e.target.value);
+
+  return (
+    <Card>
+      <CardTitle>Roofing Accessories / Included in Square Pricing</CardTitle>
+      <p className="text-[11px] text-gray-500 mb-3">
+        These items are included in the base square price. Enter quantities, colors, sizes and types so production can order correctly.
+      </p>
+
+      {/* Column headers */}
+      <div className="grid gap-2 px-2 mb-1.5" style={{ gridTemplateColumns: '2fr 70px 100px 110px 110px' }}>
+        {['Accessory', 'Qty', 'Color', 'Size', 'Type'].map((h, i) => (
+          <span key={i} className={`text-[10px] text-gray-600 uppercase tracking-wider ${i === 0 ? 'text-left' : 'text-center'}`}>
+            {h}
+          </span>
+        ))}
+      </div>
+
+      {items.map((acc, i) => (
+        <div
+          key={acc.id}
+          className="grid gap-2 items-center px-2 py-2 bg-[#161616] border border-green-900/10 rounded-md mb-1"
+          style={{ gridTemplateColumns: '2fr 70px 100px 110px 110px' }}
+        >
+          {/* Label */}
+          <span className="text-[12px] text-gray-200 font-medium">{acc.label}</span>
+
+          {/* Qty */}
+          <input
+            type="number"
+            value={acc.qty}
+            placeholder="0"
+            onChange={set(i, 'qty')}
+            className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-200 px-2 py-1.5 text-[12px] outline-none text-center focus:border-green-400 w-full"
+          />
+
+          {/* Color */}
+          <input
+            type="text"
+            value={acc.color}
+            placeholder="Color..."
+            onChange={set(i, 'color')}
+            className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-300 px-2 py-1.5 text-[11px] outline-none focus:border-green-400 w-full placeholder:text-gray-700"
+          />
+
+          {/* Size */}
+          <input
+            type="text"
+            value={acc.size}
+            placeholder="Size..."
+            onChange={set(i, 'size')}
+            className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-300 px-2 py-1.5 text-[11px] outline-none focus:border-green-400 w-full placeholder:text-gray-700"
+          />
+
+          {/* Type */}
+          <input
+            type="text"
+            value={acc.type}
+            placeholder="Type..."
+            onChange={set(i, 'type')}
+            className="bg-[#1c1c1c] border border-green-900/20 rounded text-gray-300 px-2 py-1.5 text-[11px] outline-none focus:border-green-400 w-full placeholder:text-gray-700"
+          />
+        </div>
+      ))}
     </Card>
   );
 }
@@ -164,7 +232,6 @@ function RoofingLineItems() {
           color={item.color}
           total={lineTotal(item.rate, item.qty)}
           showColor
-          onRateChange={(v) => updateRoofingLineItem(i, 'rate', v)}
           onQtyChange={(v) => updateRoofingLineItem(i, 'qty', v)}
           onColorChange={(v) => updateRoofingLineItem(i, 'color', v)}
         />
@@ -182,6 +249,7 @@ export default function RoofingPage() {
     <div>
       <ProjectInfo />
       <RoofingSystem />
+      <RoofingAccessories />
       <RoofingLineItems />
       <TotalsBar items={[
         { label: 'Base Price', value: roofingTotal.base },

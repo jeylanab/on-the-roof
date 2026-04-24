@@ -26,6 +26,16 @@ export const DEFAULT_PRICING = {
       { id: 'alum_val',   label: 'Aluminum Valley Metal',             rate: 6,    unit: 'LF' },
       { id: 'cop_val',    label: 'Copper Valley Metal',               rate: 18,   unit: 'LF' },
     ],
+    // Accessories — included in square pricing, tracked for production ordering
+    accessories: [
+      { id: 'acc_drip',    label: 'Drip Edge' },
+      { id: 'acc_box',     label: 'Box Vent' },
+      { id: 'acc_turbine', label: 'Turbine Vent' },
+      { id: 'acc_broan',   label: 'Broan Vent' },
+      { id: 'acc_wall',    label: 'Wall Flashing' },
+      { id: 'acc_chim',    label: 'Chimney Flashing' },
+      { id: 'acc_pipe',    label: 'Pipe Jack' },
+    ],
   },
 
   siding: {
