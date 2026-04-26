@@ -34,7 +34,7 @@ function TierSelector() {
               value={tier.price}
               onClick={(e) => e.stopPropagation()}
               onChange={(e) => updateSidingTier(tier.id, e.target.value)}
-              className="bg-[#1c1c1c] border border-green-900/20 rounded text-green-400 px-2 py-0.5 text-[13px] w-20 text-center outline-none focus:border-green-400 mt-1"
+              className="bg-[#1c1c1c] border border-green-900/20 rounded text-green-400 px-2 py-0.5 text-[13px] w-20 text-center  outline-none focus:border-green-400 mt-1"
             />
             <div className="text-[9px] text-gray-600 mt-0.5">$ per square</div>
           </div>
