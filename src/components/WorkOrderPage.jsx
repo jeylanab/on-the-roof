@@ -1,5 +1,5 @@
-import { useRef, useState } from 'react';
-import SignatureCanvas from 'react-signature-canvas';
+import { useRef, useState, useEffect } from 'react';
+import SignaturePad from 'signature_pad';
 import emailjs from '@emailjs/browser';
 import { useCalculation } from '../context/CalculationContext';
 import { fmt } from '../data/utils';
@@ -32,62 +32,81 @@ function WORow({ label, value, isTotal = false }) {
 }
 
 // ─── SIGNATURE PAD COMPONENT ──────────────────────────────────────────────────
+// Uses signature_pad directly on a canvas — no wrapper library, fully ESM safe
 
-function SignaturePad({ label, sigRef, onClear, onSigned, signed }) {
+function SigPad({ label, padRef, onSigned, onCleared }) {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Init signature_pad
+    const sp = new SignaturePad(canvas, {
+      penColor: '#39ff14',
+      backgroundColor: 'rgba(0,0,0,0)',
+      minWidth: 1.5,
+      maxWidth: 2.5,
+    });
+
+    // Store instance on the ref so handlePrint can access it
+    padRef.current = sp;
+
+    sp.addEventListener('endStroke', () => {
+      if (onSigned && !sp.isEmpty()) onSigned();
+    });
+
+    // Resize canvas correctly for device pixel ratio (prevents blurry sigs)
+    const resize = () => {
+      const ratio   = Math.max(window.devicePixelRatio || 1, 1);
+      const data    = sp.toData(); // save current strokes
+      canvas.width  = canvas.offsetWidth  * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext('2d').scale(ratio, ratio);
+      sp.fromData(data); // restore strokes after resize
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      sp.off();
+    };
+  }, []);
+
+  const handleClear = () => {
+    padRef.current?.clear();
+    if (onCleared) onCleared();
+  };
+
   return (
     <div className="bg-[#161616] border border-green-900/20 rounded-lg p-3">
-      {/* Label */}
       <div className="flex items-center justify-between mb-2">
         <div className="text-[11px] text-gray-500 uppercase tracking-wider font-medium">{label}</div>
         <button
-          onClick={onClear}
+          onClick={handleClear}
           className="text-[10px] text-gray-600 hover:text-red-400 border border-green-900/20 hover:border-red-900/30 rounded px-2 py-0.5 transition-colors"
         >
           Clear
         </button>
       </div>
-
-      {/* Canvas area */}
       <div
-        className={`rounded-md border-2 transition-colors overflow-hidden ${
-          signed ? 'border-green-400/40' : 'border-dashed border-green-900/30'
-        }`}
-        style={{ background: '#0f0f0f', touchAction: 'none' }}
+        className="rounded-md border-2 border-dashed border-green-900/30 overflow-hidden"
+        style={{ background: '#0f0f0f', touchAction: 'none', height: '120px' }}
       >
-        <SignatureCanvas
-          ref={sigRef}
-          penColor="#39ff14"
-          backgroundColor="transparent"
-          onEnd={onSigned}
-          canvasProps={{
-            width: 380,
-            height: 120,
-            style: { width: '100%', height: '120px', display: 'block' },
-          }}
+        <canvas
+          ref={canvasRef}
+          style={{ width: '100%', height: '100%', display: 'block' }}
         />
       </div>
-
-      {/* Status */}
-      <div className="mt-1.5 flex items-center gap-1.5">
-        {signed ? (
-          <>
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-            <span className="text-[10px] text-green-400">Signed</span>
-          </>
-        ) : (
-          <>
-            <div className="w-1.5 h-1.5 rounded-full bg-gray-600" />
-            <span className="text-[10px] text-gray-600">Sign above with finger or stylus</span>
-          </>
-        )}
-      </div>
+      <div className="mt-1.5 text-[10px] text-gray-600">Sign above with finger or stylus</div>
     </div>
   );
 }
 
 // ─── PDF DOCUMENT (white, print-ready) ────────────────────────────────────────
 
-function PDFDocument({ state, roofingTotal, sidingTotal, fasciaTotal, gutterTotal, grandTotal, customerSig, repSig }) {
+function PDFDocument({ state, roofingTotal, sidingTotal, fasciaTotal, gutterTotal, grandTotal }) {
   const { project, roofing, siding, gutter, payment, fascia, soffit } = state;
   const deposit    = parseFloat(payment.depositAmount) || 0;
   const remaining  = Math.max(0, grandTotal - deposit);
@@ -263,22 +282,18 @@ function PDFDocument({ state, roofingTotal, sidingTotal, fasciaTotal, gutterTota
       <Row label="Remaining Balance" value={fmt(remaining)} />
       <TotalRow label="GRAND TOTAL"  value={fmt(grandTotal)} />
 
-      {/* SIGNATURES — embedded as images if captured */}
+      {/* SIGNATURES — images written directly via DOM ids in handlePrint */}
       <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
         <div style={s.sigBox}>
           <div style={s.sigLabel}>Customer Signature</div>
-          {customerSig
-            ? <img src={customerSig} alt="Customer signature" style={s.sigImg} />
-            : <div style={s.sigLine} />
-          }
+          <img id="pdf-sig-customer" alt="Customer signature" style={{ ...s.sigImg, display: 'none' }} />
+          <div id="pdf-sig-customer-line" style={s.sigLine} />
           <div style={s.sigSub}>{project.customerName || 'Customer'} · {project.date || ''}</div>
         </div>
         <div style={s.sigBox}>
           <div style={s.sigLabel}>OTRC Representative</div>
-          {repSig
-            ? <img src={repSig} alt="Rep signature" style={s.sigImg} />
-            : <div style={s.sigLine} />
-          }
+          <img id="pdf-sig-rep" alt="Rep signature" style={{ ...s.sigImg, display: 'none' }} />
+          <div id="pdf-sig-rep-line" style={s.sigLine} />
           <div style={s.sigSub}>{project.repName || 'Representative'} · {project.date || ''}</div>
         </div>
       </div>
@@ -307,39 +322,38 @@ export default function WorkOrderPage() {
   const hasFascia  = fasciaTotal > 0;
   const hasGutter  = gutterTotal > 0;
 
-  // Signature refs
+  // signature_pad instances stored here (set by SigPad component via padRef)
   const customerSigRef = useRef(null);
   const repSigRef      = useRef(null);
 
-  // Signature state — track if each pad has been signed
   const [customerSigned, setCustomerSigned] = useState(false);
   const [repSigned,      setRepSigned]      = useState(false);
-
-  // Captured base64 signature images (set when printing/emailing)
-  const [customerSigImg, setCustomerSigImg] = useState('');
-  const [repSigImg,      setRepSigImg]      = useState('');
 
   const [emailing,  setEmailing]  = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [emailErr,  setEmailErr]  = useState('');
 
-  // Capture signatures as PNG data URLs before print/email
-  const captureSignatures = () => {
-    const custSig = customerSigRef.current && !customerSigRef.current.isEmpty()
-      ? customerSigRef.current.getTrimmedCanvas().toDataURL('image/png')
-      : '';
-    const repSig  = repSigRef.current && !repSigRef.current.isEmpty()
-      ? repSigRef.current.getTrimmedCanvas().toDataURL('image/png')
-      : '';
-    setCustomerSigImg(custSig);
-    setRepSigImg(repSig);
-    return { custSig, repSig };
-  };
-
   const handlePrint = () => {
-    captureSignatures();
-    // Small delay so state updates before print dialog
-    setTimeout(() => window.print(), 150);
+    // signature_pad API: isEmpty(), toDataURL()
+    const custSig = customerSigRef.current && !customerSigRef.current.isEmpty()
+      ? customerSigRef.current.toDataURL('image/png')
+      : '';
+    const repSig = repSigRef.current && !repSigRef.current.isEmpty()
+      ? repSigRef.current.toDataURL('image/png')
+      : '';
+
+    // Write directly into PDF DOM — no React re-render needed
+    const custEl   = document.getElementById('pdf-sig-customer');
+    const repEl    = document.getElementById('pdf-sig-rep');
+    const custLine = document.getElementById('pdf-sig-customer-line');
+    const repLine  = document.getElementById('pdf-sig-rep-line');
+
+    if (custEl)   { custEl.src = custSig; custEl.style.display = custSig ? 'block' : 'none'; }
+    if (repEl)    { repEl.src  = repSig;  repEl.style.display  = repSig  ? 'block' : 'none'; }
+    if (custLine) custLine.style.display = custSig ? 'none' : 'block';
+    if (repLine)  repLine.style.display  = repSig  ? 'none' : 'block';
+
+    window.print();
   };
 
   const buildEmailBody = () => {
@@ -444,8 +458,6 @@ export default function WorkOrderPage() {
           fasciaTotal={fasciaTotal}
           gutterTotal={gutterTotal}
           grandTotal={grandTotal}
-          customerSig={customerSigImg}
-          repSig={repSigImg}
         />
       </div>
 
@@ -568,27 +580,17 @@ export default function WorkOrderPage() {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <SignaturePad
+          <SigPad
             label="Customer Signature"
-            sigRef={customerSigRef}
-            signed={customerSigned}
+            padRef={customerSigRef}
             onSigned={() => setCustomerSigned(true)}
-            onClear={() => {
-              customerSigRef.current?.clear();
-              setCustomerSigned(false);
-              setCustomerSigImg('');
-            }}
+            onCleared={() => setCustomerSigned(false)}
           />
-          <SignaturePad
+          <SigPad
             label="OTRC Representative"
-            sigRef={repSigRef}
-            signed={repSigned}
+            padRef={repSigRef}
             onSigned={() => setRepSigned(true)}
-            onClear={() => {
-              repSigRef.current?.clear();
-              setRepSigned(false);
-              setRepSigImg('');
-            }}
+            onCleared={() => setRepSigned(false)}
           />
         </div>
 
